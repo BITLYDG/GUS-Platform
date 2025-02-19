@@ -7,10 +7,10 @@ const CONFIG = {
     baseUrl: `${protocol}//${host}:${port}/`, 
     dataUrl: `${protocol}//${host}:${port}/task/data/`,  
     listUrl: `${protocol}//${host}:${port}/tasks/`, 
-    debug: true,
+    debug: false,
     timeLimit: 10000 // 视图状态检查时间限制
 };
-console.log(216);
+
 /**
  * 对话记录模块
  * 负责记录和管理AI对话内容
