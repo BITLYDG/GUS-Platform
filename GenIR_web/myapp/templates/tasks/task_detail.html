@@ -1,0 +1,429 @@
+{% extends "chat.html" %}
+{% block javascript %}
+{% endblock %}
+{% block newchat %}
+{% endblock %}
+{% block signin_annotation %}
+{% endblock %}
+{% block content %}
+
+<div class="container mx-auto px-4 max-w-4xl h-screen flex flex-col">
+    <!-- Header area -->
+    <div class="pt-6 pb-4 flex-shrink-0 border-b border-gray-200">
+        <div class="flex items-center justify-between mb-4">
+            <button id="submit-btn" type="button"
+                    class="bg-blue-600 text-white px-3 py-1 rounded-md hover:bg-blue-700 transition-colors shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 text-sm">
+                Submit Rating
+            </button>
+
+            <h1 class="text-2xl font-bold text-gray-800 flex items-center mx-auto">
+                <svg class="w-6 h-6 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                Annotation Task Details
+            </h1>
+
+            <a href="{% url 'task-list' %}" class="text-blue-600 hover:text-blue-800 flex items-center">
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                </svg>
+                Return to List
+            </a>
+        </div>
+
+
+    </div>
+
+    <!-- Chat content area -->
+    <div class="chat-content flex-grow overflow-y-auto pt-4">
+        <div class="container-xxl pb-32">
+            <ul class="list-unstyled space-y-8" id="chat-messages">
+                {% for dialogue in task.dialogue %}
+                <li class="mb-12">
+                    <!-- User message -->
+                    <div class="flex justify-end mb-4">
+                        <div class="max-w-[85%] bg-gradient-to-br from-blue-100 to-blue-50 p-4 rounded-2xl shadow-sm relative">
+                            <div class="absolute top-2 right-3 flex items-center space-x-1">
+                                <span class="text-sm font-semibold text-blue-600">Me</span>
+                                <svg class="w-4 h-4 text-blue-400" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 14l9-5-9-5-9 5 9 5z"/>
+                                </svg>
+                            </div>
+                            <div class="text-gray-800 leading-relaxed whitespace-pre-wrap text-sm">{{ dialogue.queryText }}</div>
+                            <div class="text-xs text-gray-500 mt-2 text-right flex items-center justify-end space-x-1">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                <span>{{ dialogue.timestamp|date:"Y-m-d H:i:s" }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% for response in dialogue.responses %}
+                    <!-- AI reply -->
+                    <div class="flex justify-start mb-6">
+                        <div class="max-w-[85%] bg-gradient-to-br from-gray-100 to-gray-50 p-4 rounded-2xl shadow-sm relative">
+                            <div class="absolute top-2 left-3 flex items-center space-x-1">
+                                <svg class="w-4 h-4 text-purple-500" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8z"/>
+                                </svg>
+                                <span class="text-sm font-semibold text-purple-600">AI</span>
+                            </div>
+                            <div class="text-gray-800 leading-relaxed whitespace-pre-wrap text-sm">{{ response.responseHTML|safe }}</div>
+                            <div class="text-xs text-gray-500 mt-2 flex items-center space-x-1">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                <span>{{ response.timestamp|date:"Y-m-d H:i:s" }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Response evaluation form -->
+                    <div class="ml-14 mt-4">
+                        <form method="post" class="bg-white border border-gray-100 p-6 rounded-2xl shadow-sm">
+                            {% csrf_token %}
+                            <input type="hidden" name="dialogue_id" value="{{ dialogue.queryId }}">
+                            <input type="hidden" name="response_id" value="{{ response.responseId }}">
+
+                            <div class="grid grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label class="block text-gray-700 font-medium mb-2 flex items-center">
+                                        <svg class="w-4 h-4 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
+                                        </svg>
+                                        Response Quality Rating
+                                    </label>
+                                    <select name="quality_score_q_{{ dialogue.queryId }}_r_{{ response.responseId }}" class="w-full p-2 border rounded-md" required>
+                                        <option value="">Please select rating</option>
+                                        <option value="5">5 points - Completely accurate and helpful</option>
+                                        <option value="4">4 points - Generally accurate, slight flaws</option>
+                                        <option value="3">3 points - Partially accurate, room for improvement</option>
+                                        <option value="2">2 points - Many errors, needs correction</option>
+                                        <option value="1">1 point - Completely inaccurate or irrelevant</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label class="block text-gray-700 font-medium mb-2">Relevance Rating</label>
+                                    <select name="relevance_score_q_{{ dialogue.queryId }}_r_{{ response.responseId }}" class="w-full p-2 border rounded-md" required>
+                                        <option value="">Please select rating</option>
+                                        <option value="3">3 points - Highly relevant</option>
+                                        <option value="2">2 points - Partially relevant</option>
+                                        <option value="1">1 point - Completely irrelevant</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Link evaluation area -->
+<!-- Modified link evaluation area -->
+<div class="mb-4">
+    <label class="block text-gray-700 font-medium mb-2">Link Evaluation (Only showing links actually clicked by users)</label>
+    <div class="space-y-2 bg-gray-50 p-3 rounded-md">
+        {% for click in filtered_clicks %}
+            {% if click.dialogueContext.dialogueIndex == forloop.parentloop.parentloop.counter and click.elementType == "link" %}
+                <div class="flex items-center justify-between">
+                    <span class="text-sm text-blue-600">{{ click.href }}</span>
+                    <select name="link_score_{{ click.dialogueContext.linkIndexInResponse }}"
+                            class="ml-2 p-1 border rounded-md text-sm">
+                        <option value="">Rating</option>
+                        <option value="3">Very useful</option>
+                        <option value="2">Average</option>
+                        <option value="1">Useless</option>
+                    </select>
+                </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+</div>
+
+
+                            <div class="mb-4">
+                                <label class="block text-gray-700 font-medium mb-2">Question Type</label>
+                                <select name="question_type_q_{{ dialogue.queryId }}" class="w-full p-2 border rounded-md">
+                                    <option value="">Please select type</option>
+                                    <option value="factual">Factual Question</option>
+                                    <option value="opinion">Opinion Question</option>
+                                    <option value="procedural">Procedural Question</option>
+                                    <option value="clarification">Clarification Question</option>
+                                    <option value="comparison">Comparison Question</option>
+                                    <option value="recommendation">Recommendation Question</option>
+                                    <option value="other">Other Type</option>
+                                </select>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label class="block text-gray-700 font-medium mb-2">Response Completeness</label>
+                                    <select name="completeness_q_{{ dialogue.queryId }}_r_{{ response.responseId }}" class="w-full p-2 border rounded-md">
+                                        <option value="">Please select rating</option>
+                                        <option value="3">Complete answer</option>
+                                        <option value="2">Partial answer</option>
+                                        <option value="1">Incomplete answer</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label class="block text-gray-700 font-medium mb-2">Response Clarity</label>
+                                    <select name="clarity_q_{{ dialogue.queryId }}_r_{{ response.responseId }}" class="w-full p-2 border rounded-md">
+                                        <option value="">Please select rating</option>
+                                        <option value="3">Very clear</option>
+                                        <option value="2">Basically clear</option>
+                                        <option value="1">Not clear enough</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="block text-gray-700 font-medium mb-2">Required Elements for Answer</label>
+                                <div class="space-y-2">
+                                    <label class="flex items-center">
+                                        <input type="checkbox" name="required_elements_{{ dialogue.queryId }}_{{ response.responseId }}[]" value="code" class="mr-2">
+                                        <span>Include code examples</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" name="required_elements_{{ dialogue.queryId }}_{{ response.responseId }}[]" value="reference" class="mr-2">
+                                        <span>Include references</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" name="required_elements_{{ dialogue.queryId }}_{{ response.responseId }}[]" value="steps" class="mr-2">
+                                        <span>Include step-by-step instructions</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" name="required_elements_{{ dialogue.queryId }}_{{ response.responseId }}[]" value="examples" class="mr-2">
+                                        <span>Include examples</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="block text-gray-700 font-medium mb-2">Annotation Notes</label>
+                                <textarea name="annotation_comment_q_{{ dialogue.queryId }}_r_{{ response.responseId }}" rows="3"
+                                    class="w-full p-2 border rounded-md"
+                                    placeholder="Please enter annotation comments..."></textarea>
+                            </div>
+
+                            <div>
+                                <label class="block text-gray-700 font-medium mb-2">Improvement Suggestions</label>
+                                <textarea name="improvement_suggestions_q_{{ dialogue.queryId }}_r_{{ response.responseId }}" rows="2"
+                                    class="w-full p-2 border rounded-md"
+                                    placeholder="Please enter improvement suggestions..."></textarea>
+                            </div>
+                        </form>
+                    </div>
+                    {% endfor %}
+                </li>
+                {% endfor %}
+            </ul>
+            <!-- Overall session evaluation form (more compact version) -->
+    <div class="flex-shrink-0 mt-4 mb-6">
+        <div class="bg-white border border-gray-200 rounded-lg p-4">
+            <h2 class="text-base font-medium mb-3 text-gray-800">Overall Session Evaluation</h2>
+            <form id="session-form" class="space-y-3">
+                <div class="grid grid-cols-3 gap-3">
+                    <div>
+                        <label class="block text-sm text-gray-700 mb-1">Overall Satisfaction</label>
+                        <select name="session_satisfaction" class="w-full p-1.5 text-sm border rounded" required>
+                            <option value="">Please select rating</option>
+                            <option value="5">5 points - Very satisfied</option>
+                            <option value="4">4 points - Satisfied</option>
+                            <option value="3">3 points - Average</option>
+                            <option value="2">2 points - Not very satisfied</option>
+                            <option value="1">1 point - Very unsatisfied</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-700 mb-1">AI Self-assessment Success Rate</label>
+                        <select name="ai_success_rate" class="w-full p-1.5 text-sm border rounded" required>
+                            <option value="">Please select rating</option>
+                            <option value="5">5 points - Complete success</option>
+                            <option value="4">4 points - Basic success</option>
+                            <option value="3">3 points - Partial success</option>
+                            <option value="2">2 points - Mostly failed</option>
+                            <option value="1">1 point - Complete failure</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-700 mb-1">User Search Intent</label>
+                        <select name="search_intent" class="w-full p-1.5 text-sm border rounded" required>
+                            <option value="">Please select category</option>
+                            <option value="information">Information query</option>
+                            <option value="navigation">Navigation guidance</option>
+                            <option value="transaction">Transaction related</option>
+                            <option value="communication">Communication</option>
+                            <option value="entertainment">Entertainment</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <div>
+                        <label class="block text-sm text-gray-700 mb-1">Reasons for Dissatisfaction (multiple choice)</label>
+                        <div class="flex space-x-4">
+                            <label class="flex items-center text-sm">
+                                <input type="checkbox" name="dissatisfaction_reasons" value="accuracy" class="mr-1">
+                                <span>Inaccurate answers</span>
+                            </label>
+                            <label class="flex items-center text-sm">
+                                <input type="checkbox" name="dissatisfaction_reasons" value="relevance" class="mr-1">
+                                <span>Irrelevant answers</span>
+                            </label>
+                            <label class="flex items-center text-sm">
+                                <input type="checkbox" name="dissatisfaction_reasons" value="incomplete" class="mr-1">
+                                <span>Incomplete answers</span>
+                            </label>
+                            <label class="flex items-center text-sm">
+                                <input type="checkbox" name="dissatisfaction_reasons" value="understanding" class="mr-1">
+                                <span>Misunderstanding</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm text-gray-700 mb-1">Other Notes</label>
+                        <textarea name="session_notes" rows="1" class="w-full p-1.5 text-sm border rounded"
+                            placeholder="Please enter other relevant notes..."></textarea>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+        </div>
+    </div>
+
+
+
+
+
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.16/dist/tailwind.min.css" rel="stylesheet">
+<style>
+    .error-border {
+        border: 2px solid #dc2626 !important;
+        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+    }
+</style>
+
+<script>
+    document.getElementById('submit-btn').addEventListener('click', function () {
+        // Clear old hints
+        document.querySelectorAll('.error-hint').forEach(el => el.remove());
+        document.querySelectorAll('.error-border').forEach(el => el.classList.remove('error-border'));
+    
+        let firstError = null;
+        let allFilled = true;
+    
+        // Check all required fields
+        document.querySelectorAll('select[required]').forEach(select => {
+            if (!select.value) {
+                allFilled = false;
+                // Add error style
+                select.classList.add('error-border');
+                // Add error hint
+                const error = document.createElement('span');
+                error.className = 'error-hint text-red-600 text-sm ml-2';
+                error.textContent = 'Please complete this field';
+                select.parentNode.appendChild(error);
+                
+                // Record the position of the first error
+                if (!firstError) firstError = select;
+            }
+        });
+
+        document.querySelectorAll('select[name^="link_score_"]').forEach(select => {
+            if (!select.value) {
+                allFilled = false;
+                select.classList.add('error-border');
+                const error = document.createElement('span');
+                error.className = 'error-hint text-red-600 text-sm ml-2';
+                error.textContent = 'Please complete the link score';
+                select.parentNode.appendChild(error);
+                if (!firstError) firstError = select;
+            }
+        });
+    
+        if (!allFilled) {
+            // Scroll to the position of the first error
+            firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            // Add shake animation
+            firstError.parentNode.animate([
+                { transform: 'translateX(0)' },
+                { transform: 'translateX(-10px)' },
+                { transform: 'translateX(10px)' },
+                { transform: 'translateX(0)' }
+            ], { duration: 400 });
+            return;
+        }
+
+        // Retain enhanced original submission logic
+        const forms = document.querySelectorAll('form');
+        let formData = new FormData();
+
+        // Automatically include CSRF token
+        formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+
+        // Debug: print all fields
+        forms.forEach((form, index) => {
+            const data = new FormData(form);
+            console.log(`Form ${index + 1} fields:`);
+            for (const [key, value] of data.entries()) {
+                console.log(key, ':', value);
+                formData.append(key, value);
+            }
+        });
+
+        // Show loading state
+        const originalBtnText = this.innerHTML;
+        this.innerHTML = `
+            <div class="flex items-center">
+                <svg class="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Submitting...
+            </div>
+        `;
+        this.disabled = true;
+
+        fetch("{% url 'task-detail' task.id %}", {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => {
+            this.innerHTML = originalBtnText;
+            this.disabled = false;
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                window.location.href = "{% url 'task-list' %}";
+            } else {
+                alert('Submission failed: ' + (data.error || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            console.error('Error details:', error);
+            alert(`Submission failed: ${error.message || 'Network error'}`);
+        });
+    });
+
+    // Clear error styles
+    document.querySelectorAll('select').forEach(select => {
+        select.addEventListener('change', function() {
+            if (this.value) {
+                this.closest('form').style.removeProperty('border');
+                this.closest('form').style.removeProperty('margin-bottom');
+            }
+        });
+    });
+    </script>
+
+{% endblock %}
