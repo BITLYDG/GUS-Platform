@@ -1,0 +1,151 @@
+﻿<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="Responsive Bootstrap 4 and web Application ui kit.">
+    <title>:: PostMan :: Chat Application</title>
+    <link rel="icon" href="{% static 'favicon.ico' %}" type="image/x-icon"/>
+    <link rel="stylesheet" href="{% static 'assets/fonts/material-icon/css/material-design-iconic-font.min.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/style.min.css' %}">
+    <style>
+        /* 模态框背景 */
+        .modal {
+            display: none; /* 默认隐藏 */
+            position: fixed;
+            z-index: 9999; /* 置于最顶层 */
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4); /* 半透明背景 */
+        }
+        /* 模态框内容 */
+        .modal-content {
+            background-color: #fff;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        /* 关闭按钮 */
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        /* 错误信息样式 */
+        .error-message {
+            color: #21AA93;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+<div id="layout" class="theme-cyan">
+    <div class="authentication">
+        <div class="container d-flex flex-column">
+            <div class="row align-items-center justify-content-center no-gutters min-vh-100">
+                <div class="col-12 col-md-7 col-lg-5 col-xl-4 py-md-11">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body">
+                            <h3 class="text-center">Sign in</h3>
+                            <p class="text-center mb-6">Make it simple, but significant</p>
+                            <!-- 使用 POST 方法，并指定 action 对应的 URL（例如 'signin'） -->
+                            <form method="post" action="{% url 'loginAccount' %}" class="mb-4 mt-5">
+                                {% csrf_token %}
+                                <div class="input-group mb-2">
+                                    <!-- 使用 text 类型接收用户名，name属性为 username -->
+                                    <input type="text" name="username" class="form-control form-control-lg"
+                                           placeholder="Enter your username" required>
+                                </div>
+                                <div class="input-group mb-4">
+                                    <!-- 使用 password 类型接收密码，name属性为 password -->
+                                    <input type="password" name="password" class="form-control form-control-lg"
+                                           placeholder="Enter your password" required>
+                                </div>
+                                <div class="text-center mt-5">
+                                    <!-- 使用 button 元素提交表单 -->
+                                    <button type="submit" class="btn btn-lg btn-primary" title="">Sign in</button>
+                                </div>
+                            </form>
+                            <p class="text-center mb-0">
+                                Don't have an account yet? <a class="link" href="{% url 'signup' %}">Sign up</a>.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="signin-img d-none d-lg-block text-center">
+                    <img src="{% static 'assets/images/signin-img-cyan.svg' %}" alt="Sign In Image"/>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 弹窗(Modal) 开始 -->
+    <div id="errorModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <!-- 用于显示错误信息 -->
+            <p id="modalErrorMessage" class="error-message">发生了错误，请重试！</p>
+        </div>
+    </div>
+    <!-- 弹窗(Modal) 结束 -->
+
+    <!-- 如果你使用 Django 的消息框架，也可以在这里添加 JS 判断是否存在错误消息 -->
+    {% if error_id %}
+    <script>
+        // 将 Django 模板传入的 error_id 转换为具体的错误信息
+        var errorId = "{{ error_id }}";
+        var errorMsg = "";
+        if (errorId === "101") {
+            errorMsg = "The password is incorrect. Please re-enter it.";
+        } else if (errorId === "102") {
+            errorMsg = "The username is not registered.";
+        } else {
+            errorMsg = "An unknown error occurred. Please try again.";
+        }
+        // 将错误信息写入弹窗内容，并显示弹窗
+        document.getElementById("modalErrorMessage").innerText = errorMsg;
+        document.getElementById("errorModal").style.display = "block";
+    </script>
+    {% endif %}
+
+    <script>
+        // 获取模态框和关闭按钮
+        var modal = document.getElementById("errorModal");
+        var closeBtn = document.getElementsByClassName("close")[0];
+
+        // 当用户点击关闭按钮时，隐藏弹窗
+        closeBtn.onclick = function() {
+            modal.style.display = "none";
+        }
+
+        // 当用户点击模态框背景时，隐藏弹窗
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+    </script>
+</div>
+<script src="{% static 'assets/vendor/jquery/jquery-3.5.1.min.js' %}" type="1caaa891046e7adc142b6b12-text/javascript"></script>
+<script src="{% static 'assets/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"
+        type="1caaa891046e7adc142b6b12-text/javascript"></script>
+<script src="https://ajax.cloudflare.com/cdn-cgi/scripts/7089c43e/cloudflare-static/rocket-loader.min.js"
+        data-cf-settings="1caaa891046e7adc142b6b12-|49" defer></script>
+</body>
+</html>
