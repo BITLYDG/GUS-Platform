@@ -6,7 +6,7 @@ To advance the understanding of user behavior and experience with generative inf
 <img src="image/framework.png" alt="Framework" width="900px" />
 
 ## Demo Video
-You can check out our demo video here: [Watch on YouTube](https://www.youtube.com/watch?v=Zgj2gaDsmOU)
+You can check out our demo video here: [Watch on YouTube](https://www.youtube.com/watch?v=unGjg4fuKjo)
 
 ## How to run
 1. Install FlashRAG and Django with pip:
